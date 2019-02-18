@@ -13,7 +13,19 @@ namespace mrsd
 
 			float curr_x = p->x;
 			determineSafeSpots(g);
-			p->x = pickSafeSpot(g); // some value
+			// std::cout << "4" << std::endl;
+			float max_speed = g.playerSpeed;
+			// std::cout << "5" << std::endl;
+			float picked_x = pickSafeSpot(g);
+
+			if(picked_x < curr_x)
+				p->x -= max_speed;
+			else if(picked_x > curr_x)
+				p->x += max_speed;
+			else
+				p->x = curr_x;
+			std::cout << "time: " << currentTime << std::endl;
+			// p->x = pickSafeSpot(g); // some value
 
 		}
 	}
@@ -58,9 +70,11 @@ namespace mrsd
 			Prediction pred = trackProjectile(*it, g);
 
 			// Maybe insertion sort based on time here?
+
 			predictions.push_back(pred);
 
 		}
+
 
 
 	}
@@ -73,7 +87,7 @@ namespace mrsd
 
 		for(std::vector<Prediction>::iterator it = predictions.begin(); it != predictions.end(); it++){
 
-			if(it->t - currentTime <= 5 * g.getTimeStep()){
+			if(it->t - currentTime <= 200 * g.getTimeStep()){ // look ahead in 200 timesteps
 				int lower_bound = std::floor(std::max(it->x - g.explosionSize, float(0)));
 				int upper_bound = std::ceil(std::min(it->x + g.explosionSize, float(max_width)));
 
@@ -85,31 +99,130 @@ namespace mrsd
 		}
 
 		const std::list<Explosion> explosions = g.getExplosions();
-		for(std::list<Explosion>::const_iterator it = explosions.begin(); it != explosions.end(); it++)
-		{
+
+		for(std::list<Explosion>::const_iterator it = explosions.begin(); it != explosions.end(); it++){
+
 			int lower_bound = std::floor(std::max(it->x - g.explosionSize, float(0)));
 			int upper_bound = std::ceil(std::min(it->x + g.explosionSize, float(max_width)));
-			std::cout << lower_bound << std::endl;
-			std::cout << upper_bound << std::endl;
+
 			for(int i = lower_bound; i <= upper_bound; i++)
 				dangerZone[i] = 1;
 		}
 
+		// Randomly pick
 
+		// int random_index = std::rand() % max_width;
 
-		int random_index = std::rand() % max_width;
+		// while(dangerZone[random_index] == 1 ){
 
-		while(dangerZone[random_index] == 1 ){
+		// 	random_index = std::rand() % max_width;
+		// }
 
-			random_index = std::rand() % max_width;
+		int x = p->x;
+		// std::cout << x << std::endl;
+
+		if(dangerZone[x] == 0){ // current place is safe
+			/*
+			int right = max_width;
+			int left = 0;
+			for(int i = x; i <= max_width; i++){
+				if(dangerZone[i] == 1){
+					right = i;
+					break;
+				}
+			}
+			// std::cout << "8" << std::endl;
+				
+			for(int i = x; i >= 0; i--){
+				if(dangerZone[i] == 1){
+					left = i;
+					break;
+				}
+			}
+			x = (left + right) / 2;
+			*/
+			
+			predictions.clear();
+
+			return x;
 		}
 
-		predictions.clear();
+		else{
 
-		// std::cout << g.getTimeStep() << std::endl; // 0.1
-		// std::cout << g.explosionSize << std::endl; // 5
-		// std::cout << g.explosionTime << std::endl; // 2
-		return random_index;
+			while(dangerZone[x] == 1){
+
+				int right = max_width;
+				int left = 0;
+				for(int i = x; i <= max_width; i++){
+
+					if(dangerZone[i] == 0){
+						right = i;
+						break;
+					}
+				}
+
+				for(int i = x; i >= 0; i--){
+					if(dangerZone[i] == 0){
+						left = i;
+						break;
+					}
+				}
+
+
+				if(x - left > right - x)
+					x = right;
+				else
+					x = left;
+
+				/*
+				int right1 = max_width;
+				int right2 = max_width;
+				bool right_stop_flag = false;
+
+
+				int left1 = 0;
+				int left2 = 0;
+				bool left_stop_flag = false;
+
+				for(int i = x; i <= max_width; i++){
+
+					if(!right_stop_flag && dangerZone[i] == 0){
+						right1 = i;
+						right_stop_flag = true;
+					}
+					else if(right_stop_flag && dangerZone[i] == 1){
+						right2 = i;
+						break;
+					}
+
+				}
+
+				for(int i = x; i >= 0; i--){
+					if(!left_stop_flag && dangerZone[i] == 0){
+						left1 = i;
+						left_stop_flag = true;
+					}
+					else if(left_stop_flag && dangerZone[i] == 1){
+						left2 = i;
+						break;
+					}
+				}
+				int right_mid = (right2 + right1) / 2;
+				int left_mid = (left2 + left1) / 2;
+
+				if(x - left_mid > right_mid - x)
+					x = right_mid;
+				else
+					x = left_mid;
+				*/
+
+
+			}
+
+
+			predictions.clear();
+			return x;
+		}
 
 	}
 }

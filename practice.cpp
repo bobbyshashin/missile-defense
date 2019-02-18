@@ -41,6 +41,10 @@ int main(){
     return 0;
 }
 */
+struct B
+{
+    float d, e;
+};
 
 struct A
 {
@@ -49,17 +53,24 @@ struct A
     B mem;
 };
 
-struct B
-{
-    float d, e;
-};
 
 
 A stack;
 
+
 int main(){
 
 
+cout << &stack << endl;
+cout << &stack.a << endl;
+cout << &stack.b << endl;
+cout << &stack.c << endl;
+
+cout << &stack.ptr << endl;
+
+cout << &stack.mem << endl;
+cout << &stack.mem.d << endl;
+cout << &stack.mem.e << endl;
 
     return 0;
 }

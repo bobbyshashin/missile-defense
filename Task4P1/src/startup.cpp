@@ -26,7 +26,8 @@ int main(void)
 	glfe.enemyScale = 3.f;
 
 	//Setup Scenario
-	setupScenarioEasy(g);
+	// setupScenarioEasy(g);
+	setupScenarioMedium(g);
 	// setupScenarioHard(g);
 	// setupScenarioVeryHard(g);
 	// setupScenarioImpossible(g);
